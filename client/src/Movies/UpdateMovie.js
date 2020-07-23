@@ -17,7 +17,6 @@ function UpdateMovie(props){
         setFormValue({...formValue, [e.target.name]:e.target.value})
     }
 
-
     const handleSubmit = e => {
         e.preventDefault();
         handleEditMovie()
@@ -29,7 +28,7 @@ function UpdateMovie(props){
             setFormValue(movieToUpdate)
         }
         
-    })
+    }, [props.movieList, id])
 
     const handleEditMovie = e => {
         const updatedMovie = {
@@ -40,6 +39,7 @@ function UpdateMovie(props){
         axios.put(`http://localhost:5000/api/movies/${movie.id}`, formValue)
         .then(res => {
             setFormValue(updatedMovie);
+            this.history.push(`/update-movie/${id}`)
         })
         .catch(err => console.log(err))
     }
@@ -74,7 +74,7 @@ function UpdateMovie(props){
                     onChange={handleChange}
                     />
                 </label>
-            <button>Edit</button>
+            <button onClick={handleEditMovie}>Edit</button>
             </form>
         </div>
     )
