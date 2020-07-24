@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 
 const initialMovieValues = {
     title:'',
@@ -9,39 +9,28 @@ const initialMovieValues = {
     stars:[]
 }
 
-function UpdateMovie(props){
-    const [formValue, setFormValue] = useState(initialMovieValues);
+function UpdateMovie({movieList, updateMovie}){
     const {id} = useParams();
-    const {movie} = props
+    const movieToUpdate = movieList.find(
+      movie => movie.id === Number(id)
+    );
+    const [formValue, setFormValue] = useState(movieToUpdate ||initialMovieValues);
+    const history = useHistory();
     const handleChange = e => {
         setFormValue({...formValue, [e.target.name]:e.target.value})
     }
 
     const handleSubmit = e => {
         e.preventDefault();
-        handleEditMovie()
-    }
-
-    useEffect(() => {
-        const movieToUpdate = props.movieList.find(formValue => `${formValue.id}` === id)
-        if(movieToUpdate){
-            setFormValue(movieToUpdate)
-        }
-        
-    }, [props.movieList, id])
-
-    const handleEditMovie = e => {
-        const updatedMovie = {
-            title: formValue.title,
-            director: formValue.director,
-            metascore: formValue.metascore
-        }
-        axios.put(`http://localhost:5000/api/movies/${movie.id}`, formValue)
-        .then(res => {
-            setFormValue(updatedMovie);
-            this.history.push(`/update-movie/${id}`)
-        })
-        .catch(err => console.log(err))
+        axios
+          .put(`http://localhost:5000/api/movies/${id}`, formValue)
+          .then(resp => {
+            updateMovie(resp.data);
+            history.push('/')
+          })
+          .catch(err => {
+              console.log('Error:', err);
+          })
     }
 
     return(
@@ -74,7 +63,7 @@ function UpdateMovie(props){
                     onChange={handleChange}
                     />
                 </label>
-            <button onClick={handleEditMovie}>Edit</button>
+            <button type='submit'>Update</button>
             </form>
         </div>
     )
